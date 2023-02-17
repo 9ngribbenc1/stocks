@@ -33,35 +33,86 @@ def get_fundamental_income(ticker):
     return data
 
 
+def read_tickers(file_name):
+    """
+    Reads in the file with tickers saved as a comma-separated list and returns
+    them as a Python list.
+    """
+
+    my_file = open("sp500_tickers.txt", 'r')
+    tickers = my_file.read()
+    tckrs_list = tickers.replace(' ', '').replace('\n', '').split(',')
+
+    my_file.close()
+
+    return tckrs_list
+
+class OneStock:
+    """
+    This class holds information pertaining to one stock ticker. This can be
+    everything from fundamental data to technical info.
+    """
+    def __init__(self, ticker):
+
+        self.ticker = ticker
+
+    def get_fundamental(self):
+
+        self.income = get_fundamental_income(self.ticker)
+
+
+class StockBasket:
+    """
+    This class holds information for a bunch of stocks, such as an ETF or portfolio
+    or just a random assortment that I want information/modeling on.
+    """
+    def __init__(self, ticker_list):
+
+        self.tickers = ticker_list
+        self.stocks = []
+        for tckr in self.tickers:
+            self.stocks.append(OneStock(tckr))
+            
+
+    def get_fundamentals(self):
+        
+        for stock in self.stocks:
+            stock.get_fundamental()
+
 
 def main():
 
 
     #dr = r'R:\Lab Member Files\Neil Campbell\stocks'
     dr = r'C:\Users\oxide-x240\Documents\Stocks'
-    os.chdir(dr)
+    direct = r'C:\Users\oxide-x240\Documents\github\Stocks'
+    os.chdir(direct)
+    get_from_web = True
 
     now = datetime.datetime.now()
     print(now.strftime("%m/%d/%Y, %H:%M:%S"))
     #url = 'https://www.ishares.com/us/products/239705/ishares-phlx-semiconductor-etf/1521942788811.ajax?fileType=xls&fileName=iShares-PHLX-Semiconductor-ETF_fund&dataType=fund'
 
     url = r'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=TWLO&apikey=5ELABCNC7WUW0H21'
-    #urlretrieve(url, dr + 'SOXX_holdings.xls')
-    #resp = requests.get(url)
-    data = get_fundamental_income("TWLO") 
+    #data = get_fundamental_income("TWLO") 
 
-    print('I like Silicon')
-    #output = open('test.xls', 'wb')
-    #output.write(resp.content)
-    #output.close()
+    #print(data)
 
-    #data = resp.json()
-    print(data)
-    #etfile = pd.read_excel('test.xls')
-    #print etfile.head()
+    tickers = read_tickers("sp500_tickers.txt")
+    print(tickers)
 
-    #df = pd.read_csv(dr + 'SOXX_holdings.xls', skiprows=37, engine='python')
-    #print df.head()
+    if get_from_web:
+        spbasket = StockBasket(tickers)
+        spbasket.get_fundamentals()
+        with open("stocks", "wb") as stocks_to_write:
+            pickle.dump(spbasket, stocks_to_write)
+
+    else:
+        with open("stocks", "rb") as stocks_to_write:
+            spbasket = pickle.load(stocks_to_write)
+
+    # Do stuff with the StockBasket instance
+
 
 if __name__ == '__main__':
     main()
