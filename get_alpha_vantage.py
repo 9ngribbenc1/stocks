@@ -14,6 +14,8 @@ import datetime
 import pickle
 #import xlrd
 
+import utensils.json_manip as jm
+
 
 def get_fundamental_income(ticker):
     """
@@ -87,7 +89,7 @@ def main():
     dr = r'C:\Users\oxide-x240\Documents\Stocks'
     direct = r'C:\Users\oxide-x240\Documents\github\Stocks'
     os.chdir(direct)
-    get_from_web = True
+    get_from_web = False
 
     now = datetime.datetime.now()
     print(now.strftime("%m/%d/%Y, %H:%M:%S"))
@@ -112,6 +114,17 @@ def main():
             spbasket = pickle.load(stocks_to_write)
 
     # Do stuff with the StockBasket instance
+    
+    practice = spbasket.stocks[6].income
+
+    values_df = jm.income_to_df(practice)
+    print(values_df.columns)
+    print(values_df.dtypes)
+    print(values_df.head())
+
+
+    plt.plot(values_df['grossProfit']/1.e9, 'bo-')
+    plt.show()
 
 
 if __name__ == '__main__':
